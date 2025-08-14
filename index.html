@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GHL Form Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f7f7f7;
+    }
+    h1 {
+      color: #333;
+    }
+    .form-wrapper {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 6px;
+      max-width: 600px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<h1>GHL Form URL Capture Test</h1>
+<p>This page simulates one of your product/tool pages. When you submit the form below, the <code>page_url</code> and <code>page_slug</code> hidden fields will be filled automatically.</p>
+
+<div class="form-wrapper">
+  <!-- GHL form iframe -->
+  <iframe
+    src="https://ghl.serp.co/widget/form/m0y1IRdHmTnJKhxFErqe"
+    style="width:100%;height:400px;border:none;border-radius:3px"
+    id="inline-m0y1IRdHmTnJKhxFErqe"
+    data-layout="{'id':'INLINE'}"
+    data-trigger-type="alwaysShow"
+    data-activation-type="alwaysActivated"
+    data-deactivation-type="neverDeactivate"
+    data-form-name="Email Signup"
+    data-height="400"
+    data-layout-iframe-id="inline-m0y1IRdHmTnJKhxFErqe"
+    data-form-id="m0y1IRdHmTnJKhxFErqe"
+    title="Email Signup">
+  </iframe>
+
+  <!-- GHL's embed helper -->
+  <script src="https://ghl.serp.co/js/form_embed.js"></script>
+
+  <!-- Add page_url + page_slug to the iframe src -->
+  <script>
+  (function () {
+    function slugifyPath() {
+      var s = window.location.pathname.replace(/\/+$/,'').split('/').filter(Boolean).pop() || '';
+      return s.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'');
+    }
+
+    function injectParamsIntoIframeSrc(ifr) {
+      if (!ifr || !ifr.src) return;
+      try {
+        var u = new URL(ifr.src, window.location.origin);
+        var full = window.location.href;
+        var slug = slugifyPath();
+        var needsUpdate = false;
+
+        if (u.searchParams.get('page_url') !== full) {
+          u.searchParams.set('page_url', full);
+          needsUpdate = true;
+        }
+        if (u.searchParams.get('page_slug') !== slug) {
+          u.searchParams.set('page_slug', slug);
+          needsUpdate = true;
+        }
+        if (needsUpdate) ifr.src = u.toString();
+      } catch (e) {}
+    }
+
+    function processAll() {
+      document.querySelectorAll(
+        'iframe#inline-m0y1IRdHmTnJKhxFErqe, ' +
+        'iframe[data-form-id="m0y1IRdHmTnJKhxFErqe"], ' +
+        'iframe[src*="ghl.serp.co/widget/form/"], ' +
+        'iframe[src*="leadconnectorhq.com/widget/form/"]'
+      ).forEach(injectParamsIntoIframeSrc);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', processAll);
+    } else {
+      processAll();
+    }
+
+    var mo = new MutationObserver(processAll);
+    mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+
+    ['pushState','replaceState'].forEach(function (m) {
+      var orig = history[m];
+      history[m] = function () {
+        var ret = orig.apply(this, arguments);
+        setTimeout(processAll, 0);
+        return ret;
+      };
+    });
+    window.addEventListener('popstate', function () { setTimeout(processAll, 0); });
+  })();
+  </script>
+</div>
+
+</body>
+</html>
